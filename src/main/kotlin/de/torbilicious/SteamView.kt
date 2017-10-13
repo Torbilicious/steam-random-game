@@ -50,7 +50,7 @@ class SteamView : View("Steam lib") {
                     button("random") {
                         setOnAction {
                             if (!games.isEmpty()) {
-                                val randomGame = games[(Math.random() * games.size).toInt()]
+                                val randomGame = games.random()
                                 alert(Alert.AlertType.INFORMATION, "Random Game", randomGame)
                             }
                         }
