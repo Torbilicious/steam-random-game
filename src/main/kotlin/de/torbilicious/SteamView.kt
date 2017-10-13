@@ -2,11 +2,15 @@ package de.torbilicious
 
 import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException
 import com.github.koraktor.steamcondenser.steam.community.SteamId
+import javafx.scene.Scene
 import javafx.scene.control.Alert
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.layout.GridPane
 import javafx.scene.text.Text
+import javafx.stage.Modality
+import javafx.stage.Stage
+import javafx.stage.StageStyle
 import tornadofx.*
 
 
@@ -23,6 +27,8 @@ class SteamView : View("Steam lib") {
 
     private var steamId: SteamId? = null
 
+    private val steamLoginView: SteamLoginWebView by inject()
+
     init {
         steamId = initUser(defaultId)
 
@@ -38,6 +44,8 @@ class SteamView : View("Steam lib") {
 
                     button ("load") {
                         setOnAction {
+//                            initLogin()
+
                             try {
                                 steamId = initUser(userInput.text.toLong())
                                 updateGames()
@@ -66,6 +74,17 @@ class SteamView : View("Steam lib") {
                 }
             }
         }
+    }
+
+    private fun initLogin() {
+        val dialog = Stage(StageStyle.UTILITY)
+        dialog.title = "Steam Login"
+
+        dialog.scene = Scene(steamLoginView.root)
+        dialog.initModality(Modality.APPLICATION_MODAL)
+        dialog.height = 300.0
+        dialog.width = 300.0
+        dialog.showAndWait()
     }
 
     private fun updateGames() {

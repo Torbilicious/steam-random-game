@@ -33,7 +33,7 @@ class ExtensionsTests {
     }
 
     @Test
-    fun `List with many elemnts works`() {
+    fun `List with many elements works`() {
         val list = mutableListOf<Int>()
 
         (-10000..10000).forEach {
