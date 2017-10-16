@@ -1,20 +1,20 @@
-package de.torbilicious
+package de.torbilicious.steam
 
 import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException
+import com.github.koraktor.steamcondenser.steam.community.SteamGame
 import com.github.koraktor.steamcondenser.steam.community.SteamId
-import javafx.scene.Scene
+import de.torbilicious.popup
+import de.torbilicious.random
 import javafx.scene.control.Alert
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
+import javafx.scene.image.Image
 import javafx.scene.layout.GridPane
-import javafx.scene.text.Text
-import javafx.stage.Modality
-import javafx.stage.Stage
-import javafx.stage.StageStyle
+import javafx.scene.layout.VBox
 import tornadofx.*
 
 
-class SteamView : View("Steam lib") {
+class GamesView : View("Steam lib") {
 
     companion object {
         private val defaultId = 76561198031026305
@@ -22,12 +22,10 @@ class SteamView : View("Steam lib") {
 
     override val root = GridPane()
     private var userInput: TextField by singleAssign()
-    private var gamesText: Text by singleAssign()
-    private var games = mutableListOf<String>()
+    private var gamesBox: VBox by singleAssign()
+    private var games = mutableListOf<SteamGame>()
 
     private var steamId: SteamId? = null
-
-    private val steamLoginView: SteamLoginWebView by inject()
 
     init {
         steamId = initUser(defaultId)
@@ -40,12 +38,10 @@ class SteamView : View("Steam lib") {
 
             row {
                 hbox {
-                    userInput = textfield ()
+                    userInput = textfield(defaultId.toString())
 
-                    button ("load") {
+                    button("load") {
                         setOnAction {
-//                            initLogin()
-
                             try {
                                 steamId = initUser(userInput.text.toLong())
                                 updateGames()
@@ -59,8 +55,14 @@ class SteamView : View("Steam lib") {
                         setOnAction {
                             if (!games.isEmpty()) {
                                 val randomGame = games.random()
-                                alert(Alert.AlertType.INFORMATION, "Random Game", randomGame)
+                                alert(Alert.AlertType.INFORMATION, "Random Game", randomGame?.name)
                             }
+                        }
+                    }
+
+                    button("friends") {
+                        setOnAction {
+                            createFriendsView().popup()
                         }
                     }
                 }
@@ -69,31 +71,28 @@ class SteamView : View("Steam lib") {
             row {
                 scrollpane {
                     hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
-                    gamesText = text()
+
+                    gamesBox = vbox(spacing = 5)
                     updateGames()
                 }
             }
         }
     }
 
-    private fun initLogin() {
-        val dialog = Stage(StageStyle.UTILITY)
-        dialog.title = "Steam Login"
-
-        dialog.scene = Scene(steamLoginView.root)
-        dialog.initModality(Modality.APPLICATION_MODAL)
-        dialog.height = 300.0
-        dialog.width = 300.0
-        dialog.showAndWait()
-    }
-
     private fun updateGames() {
         games = steamId?.games?.values
-                ?.map { it.name }
-                ?.sorted()
+                ?.sortedBy { it.name }
+//                ?.take(5)
                 ?.toMutableList() ?: mutableListOf()
 
-        gamesText.text = games.joinToString("\n")
+        with(gamesBox) {
+            games.forEach {
+                hbox(spacing = 10) {
+                    imageview(it.logoThumbnailUrl)
+                    text(it.name)
+                }
+            }
+        }
     }
 
     private fun initUser(id: Long): SteamId? {
@@ -103,10 +102,19 @@ class SteamView : View("Steam lib") {
             null
         }
 
+        steamId?.fetchData()
+
         title = "Steam lib(${steamId?.nickname})"
         println("Loaded: ${steamId?.nickname}")
+        setStageIcon(Image(steamId?.avatarIconUrl))
+
         return steamId
     }
+
+    private fun createFriendsView(): FriendsView {
+        return FriendsView(steamId
+                ?.friends
+                ?.toList()
+                ?: emptyList())
+    }
 }
-
-
