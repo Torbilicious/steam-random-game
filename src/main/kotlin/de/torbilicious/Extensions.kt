@@ -1,6 +1,5 @@
 package de.torbilicious
 
-import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.stage.Modality
 import javafx.stage.Stage
@@ -28,6 +27,6 @@ fun View.popup() {
         initModality(Modality.APPLICATION_MODAL)
         height = 300.0
         width = 300.0
-        showAndWait()
+        show()
     }
 }

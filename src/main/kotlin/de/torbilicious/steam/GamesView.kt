@@ -34,7 +34,7 @@ class GamesView : View("Steam lib") {
             paddingAll = 3
 
             prefHeight = 500.0
-            prefWidth = 300.0
+            prefWidth = 400.0
 
             row {
                 hbox {
@@ -62,7 +62,9 @@ class GamesView : View("Steam lib") {
 
                     button("friends") {
                         setOnAction {
-                            createFriendsView().popup()
+                            val friendsView = createFriendsView()
+                            friendsView.popup()
+                            friendsView.showFriends()
                         }
                     }
                 }
