@@ -44,6 +44,8 @@ class WebApi {
 
         val friendsDto = friendListResponse.friendslist.friends
 
+        //TODO: load friend data via call to "GetPlayerSummaries"
+
         println("Loading ${friendsDto.size} friends")
         val deferred = friendsDto.map {
             async(CommonPool) {
