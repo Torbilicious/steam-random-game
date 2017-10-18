@@ -1,7 +1,9 @@
 package de.torbilicious.steam
 
+import de.torbilicious.popup
 import de.torbilicious.random
 import de.torbilicious.steam.api.Game
+import de.torbilicious.steam.api.SteamFriends
 import de.torbilicious.steam.api.SteamId
 import de.torbilicious.steam.api.WebApi
 import javafx.scene.control.Alert
@@ -27,6 +29,7 @@ class GamesView : View("Steam lib") {
     private val api = WebApi()
 
     private var steamId: SteamId? = null
+    private var friends: SteamFriends? = null
 
     init {
         initUser(defaultId)
@@ -63,9 +66,9 @@ class GamesView : View("Steam lib") {
 
                     button("friends") {
                         setOnAction {
-                            //                            val friendsView = createFriendsView()
-//                            friendsView.popup()
-//                            friendsView.showFriends()
+                            val friendsView = createFriendsView()
+                            friendsView.popup()
+                            friendsView.showFriends()
                         }
                     }
                 }
@@ -102,17 +105,16 @@ class GamesView : View("Steam lib") {
 
     private fun initUser(id: Long) {
 
-        steamId = api.loadId(id)
+        val result = api.loadId(id)
+        steamId = result.first
+        friends = result.second
 
         title = "Steam lib(${steamId?.nickname})"
         println("Loaded: ${steamId?.nickname}")
         setStageIcon(Image(steamId?.avatarUrl))
     }
 
-//    private fun createFriendsView(): FriendsView {
-//        return FriendsView(steamId
-//                ?.friends
-//                ?.toList()
-//                ?: emptyList())
-//    }
+    private fun createFriendsView(): FriendsView {
+        return FriendsView(friends ?: listOf())
+    }
 }
