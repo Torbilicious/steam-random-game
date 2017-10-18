@@ -10,7 +10,7 @@ import kotlinx.coroutines.experimental.runBlocking
 val baseUrl = "https://api.steampowered.com"
 
 val headers = mapOf("Accept" to "application/json")
-val apiKey = "D7581B32F8F56F62CB1D7F272E50F7D1"
+val apiKey: String? = System.getenv("API_KEY")
 
 val gson = Gson()
 
@@ -26,6 +26,10 @@ class WebApi {
     private var friends: SteamFriends = listOf()
 
     init {
+        if (apiKey == null || apiKey == "") {
+            error("No Apikey provided.")
+        }
+
         steamId = loadId(76561198031026305).first
     }
 
