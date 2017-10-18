@@ -1,6 +1,6 @@
 package de.torbilicious.steam
 
-import com.github.koraktor.steamcondenser.steam.community.SteamId
+import de.torbilicious.steam.api.SteamId
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.scene.control.ProgressIndicator
 import javafx.scene.control.ScrollPane
@@ -32,20 +32,13 @@ class FriendsView(private val friends: List<SteamId>) : View("Friends") {
         with(friendsBox) {
             friends.forEach {
                 hbox(spacing = 10) {
-                    ensureLoaded(it)
                     checkbox()
-                    imageview(it.avatarIconUrl)
+                    imageview(it.avatarUrl)
                     label(it.nickname)
                 }
             }
         }
 
         friendsLoaded.set(true)
-    }
-
-    private fun ensureLoaded(friend: SteamId) {
-        if (!friend.isFetched) {
-            friend.fetchData()
-        }
     }
 }
