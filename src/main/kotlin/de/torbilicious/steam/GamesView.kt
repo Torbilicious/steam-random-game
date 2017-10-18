@@ -1,15 +1,14 @@
 package de.torbilicious.steam
 
-import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException
-import com.github.koraktor.steamcondenser.steam.community.SteamGame
-import com.github.koraktor.steamcondenser.steam.community.SteamId
-import de.torbilicious.popup
 import de.torbilicious.random
+import de.torbilicious.steam.api.Game
+import de.torbilicious.steam.api.SteamId
+import de.torbilicious.steam.api.WebApi
 import javafx.scene.control.Alert
 import javafx.scene.control.ScrollPane
 import javafx.scene.control.TextField
 import javafx.scene.image.Image
-import javafx.scene.layout.GridPane
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import tornadofx.*
 
@@ -20,15 +19,17 @@ class GamesView : View("Steam lib") {
         private val defaultId = 76561198031026305
     }
 
-    override val root = GridPane()
+    override val root = BorderPane()
     private var userInput: TextField by singleAssign()
     private var gamesBox: VBox by singleAssign()
-    private var games = mutableListOf<SteamGame>()
+    private var games = mutableListOf<Game>()
+
+    private val api = WebApi()
 
     private var steamId: SteamId? = null
 
     init {
-        steamId = initUser(defaultId)
+        initUser(defaultId)
 
         with(root) {
             paddingAll = 3
@@ -36,14 +37,14 @@ class GamesView : View("Steam lib") {
             prefHeight = 500.0
             prefWidth = 400.0
 
-            row {
+            top {
                 hbox {
                     userInput = textfield(defaultId.toString())
 
                     button("load") {
                         setOnAction {
                             try {
-                                steamId = initUser(userInput.text.toLong())
+                                initUser(userInput.text.toLong())
                                 updateGames()
                             } catch (e: NumberFormatException) {
                                 alert(Alert.AlertType.ERROR, "Error parsing ID", "Could not get id from input!")
@@ -62,15 +63,15 @@ class GamesView : View("Steam lib") {
 
                     button("friends") {
                         setOnAction {
-                            val friendsView = createFriendsView()
-                            friendsView.popup()
-                            friendsView.showFriends()
+                            //                            val friendsView = createFriendsView()
+//                            friendsView.popup()
+//                            friendsView.showFriends()
                         }
                     }
                 }
             }
 
-            row {
+            center {
                 scrollpane {
                     hbarPolicy = ScrollPane.ScrollBarPolicy.NEVER
 
@@ -82,41 +83,36 @@ class GamesView : View("Steam lib") {
     }
 
     private fun updateGames() {
-        games = steamId?.games?.values
+        games = steamId?.games
                 ?.sortedBy { it.name }
 //                ?.take(5)
                 ?.toMutableList() ?: mutableListOf()
 
+        gamesBox.clear()
+
         with(gamesBox) {
             games.forEach {
                 hbox(spacing = 10) {
-                    imageview(it.logoThumbnailUrl)
+                    imageview(it.getLogoUrl())
                     text(it.name)
                 }
             }
         }
     }
 
-    private fun initUser(id: Long): SteamId? {
-        val steamId = try {
-            SteamId.create(id)
-        } catch (e: SteamCondenserException) {
-            null
-        }
+    private fun initUser(id: Long) {
 
-        steamId?.fetchData()
+        steamId = api.loadId(id)
 
         title = "Steam lib(${steamId?.nickname})"
         println("Loaded: ${steamId?.nickname}")
-        setStageIcon(Image(steamId?.avatarIconUrl))
-
-        return steamId
+        setStageIcon(Image(steamId?.avatarUrl))
     }
 
-    private fun createFriendsView(): FriendsView {
-        return FriendsView(steamId
-                ?.friends
-                ?.toList()
-                ?: emptyList())
-    }
+//    private fun createFriendsView(): FriendsView {
+//        return FriendsView(steamId
+//                ?.friends
+//                ?.toList()
+//                ?: emptyList())
+//    }
 }
