@@ -6,11 +6,11 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.runBlocking
 
-
 val baseUrl = "https://api.steampowered.com"
 
 val headers = mapOf("Accept" to "application/json")
 val apiKey: String? = System.getenv("API_KEY")
+val apiKeyRegEx = Regex("^[A-Z|0-9]{32}\$")
 
 val gson = Gson()
 
@@ -26,7 +26,7 @@ class WebApi {
     private var friends: SteamFriends = listOf()
 
     init {
-        if (apiKey == null || apiKey == "") {
+        if (apiKey == null || apiKey == "" || !apiKeyRegEx.matches(apiKey)) {
             error("No Apikey provided.")
         }
 
